@@ -16,45 +16,130 @@ double randfrom(double min, double max)
     double div = RAND_MAX / range;
     return min + (rand() / div);
 }
-
-double medf (double *wind, int windsize)
+#define MAX_WIND_SIZE_FOR_MED 10
+double medf (double newitem, int windsize)
 {
-    int i, j;
-    double* bufwind = calloc(windsize, sizeof(double));
-    for(int i = 0; i < windsize; i++)
+    static double window_sorted[MAX_WIND_SIZE_FOR_MED] = {0.0};
+    static double window[MAX_WIND_SIZE_FOR_MED] = {0.0};
+    static int count = 0;
+    int i,j;
+
+
+    i = 0;
+
+    if(++count >= windsize)
     {
-        bufwind[i] = *(wind + i);
+        count = 0;
     }
-    double buf = bufwind[0];
-    for(i = 0; i < windsize - 1; i++)
-    {
-        for(j = i + 1; j < windsize; j++)
-        {
-            if(bufwind[j] < bufwind[i])
-            {
-                buf = bufwind[i];
-                bufwind[i] = bufwind[j];
-                bufwind[j] = buf;
-            }
-        }
-    }
-    #if 0
     for(i = 0; i < windsize; i++)
     {
-        printf("%f\n",bufwind[i]);
+        if(window_sorted[i] == window[count])
+        {
+            break;
+        }
     }
-    #endif
-    if(windsize % 2 == 0)
-        return (bufwind[windsize / 2] + bufwind[windsize / 2 - 1])/2;
+    for(;i<windsize-1; i++)
+    {
+        window_sorted[i] = window_sorted[i+1];
+    }
+    window_sorted[windsize - 1] = 0;
+
+
+
+    window[count] = newitem;
+    i = 0;
+    while(i < windsize - 1)
+    {
+        if(window_sorted[i] <= newitem)
+        {
+            i++;
+        }
+        else
+        {
+            break;
+        }
+    }
+    for(j = windsize - 1;j>i; j--)
+    {
+        window_sorted[j] = window_sorted[j-1];
+    }
+    window_sorted[i] = newitem;
+
+
+       if(windsize % 2 == 0)
+        return (window_sorted[windsize / 2] + window_sorted[windsize / 2 - 1])/2;
     else
-        return bufwind[windsize / 2];
+        return window_sorted[windsize / 2];
 }
 
-#define MAX_WIND_SIZE 10 //!!!!!!Ã¿ —»Ã¿À‹Õ€… –¿«Ã–≈ Œ Õ¿
+
+double medf2 (double newitem, int windsize)
+{
+    static double window_sorted[MAX_WIND_SIZE_FOR_MED] = {0.0};
+    static double window[MAX_WIND_SIZE_FOR_MED] = {0.0};
+    static int count = 0;
+    int i,j;
+
+
+    i = 0;
+
+    if(++count >= windsize)
+    {
+        count = 0;
+    }
+    for(i = 0; i < windsize; i++)
+    {
+        if(window_sorted[i] == window[count])
+        {
+            break;
+        }
+    }
+    for(;i<windsize-1; i++)
+    {
+        window_sorted[i] = window_sorted[i+1];
+    }
+    window_sorted[windsize - 1] = 0;
+
+
+
+    window[count] = newitem;
+    i = 0;
+    while(i < windsize - 1)
+    {
+        if(window_sorted[i] <= newitem)
+        {
+            i++;
+        }
+        else
+        {
+            break;
+        }
+    }
+    for(j = windsize - 1;j>i; j--)
+    {
+        window_sorted[j] = window_sorted[j-1];
+    }
+    window_sorted[i] = newitem;
+
+
+       if(windsize % 2 == 0)
+        return (window_sorted[windsize / 2] + window_sorted[windsize / 2 - 1])/2;
+    else
+        return window_sorted[windsize / 2];
+}
+
+
+
+
+
+
+
+
+#define MAX_WIND_SIZE_FOR_AVG 10 //!!!!!!Ã¿ —»Ã¿À‹Õ€… –¿«Ã–≈ Œ Õ¿
 double movavf(double newitem, int windsize)
 {
-    static double window[MAX_WIND_SIZE];
-    static int count;
+    static double window[MAX_WIND_SIZE_FOR_AVG] = {0.0};
+    static int count = 0;
     static double sum = 0;
     sum -= window[count];
     window[count] = newitem;
@@ -98,7 +183,7 @@ int main()
 
     for (i=0; i < NUM_POINTS - 9; i++)
     {
-    fprintf(temp, "%lf %lf %lf %lf %lf %lf\n", xvals[i], yvals[i], movavf(yvals[i], 4), movavf(yvals[i], 10), medf(&yvals[i], 3), medf(&yvals[i], 8)); //Write the data to a temporary file
+    fprintf(temp, "%lf %lf %lf %lf %lf %lf\n", xvals[i], yvals[i], movavf(yvals[i], 4), movavf(yvals[i], 5), medf(yvals[i], 3), medf2(yvals[i], 8)); //Write the data to a temporary file
     //fprintf(temp, "%lf %lf \n", xvals[i], yvals[i]);
     }
 

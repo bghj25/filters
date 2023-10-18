@@ -50,15 +50,18 @@ double medf (double *wind, int windsize)
         return bufwind[windsize / 2];
 }
 
-double movavf(double *wind, int windsize)
+#define MAX_WIND_SIZE 10 //!!!!!!Ã¿ —»Ã¿À‹Õ€… –¿«Ã–≈ Œ Õ¿
+double movavf(double newitem, int windsize)
 {
-    int i;
-    double sum = 0;
-    for(i = 0; i < windsize; i++)
+    static double window[MAX_WIND_SIZE];
+    static int count;
+    static double sum = 0;
+    sum -= window[count];
+    window[count] = newitem;
+    sum += newitem;
+    if(++count >= windsize)
     {
-        //printf("%f\n", *wind);
-        sum += *wind;
-        wind++;
+        count = 0;
     }
     return sum/windsize;
 }
@@ -95,7 +98,7 @@ int main()
 
     for (i=0; i < NUM_POINTS - 9; i++)
     {
-    fprintf(temp, "%lf %lf %lf %lf %lf %lf\n", xvals[i], yvals[i], movavf(&yvals[i], 4), movavf(&yvals[i], 5), medf(&yvals[i], 3), medf(&yvals[i], 8)); //Write the data to a temporary file
+    fprintf(temp, "%lf %lf %lf %lf %lf %lf\n", xvals[i], yvals[i], movavf(yvals[i], 4), movavf(yvals[i], 10), medf(&yvals[i], 3), medf(&yvals[i], 8)); //Write the data to a temporary file
     //fprintf(temp, "%lf %lf \n", xvals[i], yvals[i]);
     }
 

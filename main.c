@@ -2,153 +2,18 @@
 #include <stdio.h>
 #include <math.h>
 #include <time.h>
-//#include <stdint.h>
+#include "filters.h"
+
 
 #define NUM_POINTS 100
 #define NUM_COMMANDS 9
 
 
-#define AV4
-//#define AV5
 double randfrom(double min, double max)
 {
     double range = (max - min);
     double div = RAND_MAX / range;
     return min + (rand() / div);
-}
-#define MAX_WIND_SIZE_FOR_MED 10
-double medf (double newitem, int windsize)
-{
-    static double window_sorted[MAX_WIND_SIZE_FOR_MED] = {0.0};
-    static double window[MAX_WIND_SIZE_FOR_MED] = {0.0};
-    static int count = 0;
-    int i,j;
-
-
-    i = 0;
-
-    if(++count >= windsize)
-    {
-        count = 0;
-    }
-    for(i = 0; i < windsize; i++)
-    {
-        if(window_sorted[i] == window[count])
-        {
-            break;
-        }
-    }
-    for(;i<windsize-1; i++)
-    {
-        window_sorted[i] = window_sorted[i+1];
-    }
-    window_sorted[windsize - 1] = 0;
-
-
-
-    window[count] = newitem;
-    i = 0;
-    while(i < windsize - 1)
-    {
-        if(window_sorted[i] <= newitem)
-        {
-            i++;
-        }
-        else
-        {
-            break;
-        }
-    }
-    for(j = windsize - 1;j>i; j--)
-    {
-        window_sorted[j] = window_sorted[j-1];
-    }
-    window_sorted[i] = newitem;
-
-
-       if(windsize % 2 == 0)
-        return (window_sorted[windsize / 2] + window_sorted[windsize / 2 - 1])/2;
-    else
-        return window_sorted[windsize / 2];
-}
-
-
-double medf2 (double newitem, int windsize)
-{
-    static double window_sorted[MAX_WIND_SIZE_FOR_MED] = {0.0};
-    static double window[MAX_WIND_SIZE_FOR_MED] = {0.0};
-    static int count = 0;
-    int i,j;
-
-
-    i = 0;
-
-    if(++count >= windsize)
-    {
-        count = 0;
-    }
-    for(i = 0; i < windsize; i++)
-    {
-        if(window_sorted[i] == window[count])
-        {
-            break;
-        }
-    }
-    for(;i<windsize-1; i++)
-    {
-        window_sorted[i] = window_sorted[i+1];
-    }
-    window_sorted[windsize - 1] = 0;
-
-
-
-    window[count] = newitem;
-    i = 0;
-    while(i < windsize - 1)
-    {
-        if(window_sorted[i] <= newitem)
-        {
-            i++;
-        }
-        else
-        {
-            break;
-        }
-    }
-    for(j = windsize - 1;j>i; j--)
-    {
-        window_sorted[j] = window_sorted[j-1];
-    }
-    window_sorted[i] = newitem;
-
-
-       if(windsize % 2 == 0)
-        return (window_sorted[windsize / 2] + window_sorted[windsize / 2 - 1])/2;
-    else
-        return window_sorted[windsize / 2];
-}
-
-
-
-
-
-
-
-
-#define MAX_WIND_SIZE_FOR_AVG 10 //!!!!!!МАКСИМАЛЬНЫЙ РАЗМРЕ ОКНА
-double movavf(double newitem, int windsize)
-{
-    static double window[MAX_WIND_SIZE_FOR_AVG] = {0.0};
-    static int count = 0;
-    static double sum = 0;
-    sum -= window[count];
-    window[count] = newitem;
-    sum += newitem;
-    if(++count >= windsize)
-    {
-        count = 0;
-    }
-    return sum/windsize;
 }
 
 int main()
@@ -157,7 +22,11 @@ int main()
     double test[5] = {-1.5, 7.5, 9.0, 14.3, 1};
     medf(&test, 5);
     #endif
-    FILE * temp = fopen("data.temp", "w");
+    FILE * temp1 = fopen("data1.temp", "w");
+    FILE * temp2 = fopen("data2.temp", "w");
+    FILE * temp3 = fopen("data3.temp", "w");
+    FILE * temp4 = fopen("data4.temp", "w");
+    FILE * temp5 = fopen("data5.temp", "w");
     FILE * gnuplotPipe = popen ("gnuplot -persistent", "w");
     char* commandsForGnuplot[] = {
         "set terminal qt size 1920, 1080",
@@ -167,7 +36,7 @@ int main()
         "set origin -0.1, 0.1",
         "set yrange [-1.5:1.5]",
         "set key box outside top vertical width 0.5 height 1 maxcols 1 spacing1",
-        "plot 'data.temp' u 1:2 title 'Исходный сигнал' with lines linecolor rgb \"blue\", 'data.temp' u 1:3 title 'Среднее 4' with lines linecolor rgb \"red\", 'data.temp' u 1:4 title 'Среднее 5' with lines linecolor rgb \"green\", 'data.temp' u 1:5 title 'Медиана 3' with lines linecolor rgb \"orange\", 'data.temp' u 1:6 title 'Медиана 8' with lines linecolor rgb \"yellow\""};
+        "plot 'data1.temp' u 1:2 title 'Исходный сигнал' with lines linecolor rgb \"blue\", 'data2.temp' u 1:2 title 'Среднее 4' with lines linecolor rgb \"red\", 'data3.temp' u 1:2 title 'Среднее 5' with lines linecolor rgb \"green\", 'data4.temp' u 1:2 title 'Медиана 3' with lines linecolor rgb \"orange\", 'data5.temp' u 1:2 title 'Медиана 8' with lines linecolor rgb \"yellow\""};
 
 
     int i;
@@ -177,20 +46,31 @@ int main()
 
     for (i=0; i < NUM_POINTS; i++)
     {
-        xvals[i] = 4 * M_PI * i / NUM_POINTS;
-        yvals[i] = sin(xvals[i]) + randfrom(-0.25, 0.25);
+        xvals[i] = 2 * M_PI * i / NUM_POINTS;
+        yvals[i] = sin(xvals[i]) + randfrom(-0.2, 0.2);
     }
 
-    for (i=0; i < NUM_POINTS - 9; i++)
+    for (i=0; i < NUM_POINTS; i++)
     {
-    fprintf(temp, "%lf %lf %lf %lf %lf %lf\n", xvals[i], yvals[i], movavf(yvals[i], 4), movavf(yvals[i], 5), medf(yvals[i], 3), medf2(yvals[i], 8)); //Write the data to a temporary file
-    //fprintf(temp, "%lf %lf \n", xvals[i], yvals[i]);
+        fprintf(temp1, "%lf %lf\n", xvals[i], yvals[i]);
+        fprintf(temp2, "%lf %lf\n", xvals[i], movavf(yvals[i], 4));
     }
-
+    for (i=0; i < NUM_POINTS; i++)
+    {
+        fprintf(temp3, "%lf %lf\n", xvals[i], movavf(yvals[i], 20)); //Write the data to a temporary file
+    }
+    for (i=0; i < NUM_POINTS; i++)
+    {
+        fprintf(temp4, "%lf %lf\n", xvals[i], medf(yvals[i], 3)); //Write the data to a temporary file
+    }
+    for (i=0; i < NUM_POINTS; i++)
+    {
+        fprintf(temp5, "%lf %lf\n", xvals[i], medf(yvals[i], 3), 8); //Write the data to a temporary file
+    }
 
     for (i=0; i <  sizeof(commandsForGnuplot)/sizeof(commandsForGnuplot[0]); i++)
     {
-    fprintf(gnuplotPipe, "%s \n", commandsForGnuplot[i]); //Send commands to gnuplot one by one.
+        fprintf(gnuplotPipe, "%s \n", commandsForGnuplot[i]); //Send commands to gnuplot one by one.
     }
 
     //return 0;

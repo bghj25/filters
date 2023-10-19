@@ -35,7 +35,7 @@ int main()
         "set size 1.1, 0.8",
         "set origin -0.1, 0.1",
         "set yrange [-1.5:1.5]",
-        "set key box outside top vertical width 0.5 height 1 maxcols 1 spacing1",
+        "set key box outside top vertical width 0.5 height 1 maxcols 1 spacing 1",
         "plot 'data1.temp' u 1:2 title 'Исходный сигнал' with lines linecolor rgb \"blue\", 'data2.temp' u 1:2 title 'Среднее 4' with lines linecolor rgb \"red\", 'data3.temp' u 1:2 title 'Среднее 5' with lines linecolor rgb \"green\", 'data4.temp' u 1:2 title 'Медиана 3' with lines linecolor rgb \"orange\", 'data5.temp' u 1:2 title 'Медиана 8' with lines linecolor rgb \"yellow\""};
 
 

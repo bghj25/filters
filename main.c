@@ -57,7 +57,7 @@ int main()
     }
     for (i=0; i < NUM_POINTS; i++)
     {
-        fprintf(temp3, "%lf %lf\n", xvals[i], movavf(yvals[i], 20)); //Write the data to a temporary file
+        fprintf(temp3, "%lf %lf\n", xvals[i], movavf(yvals[i], 5)); //Write the data to a temporary file
     }
     for (i=0; i < NUM_POINTS; i++)
     {
@@ -65,7 +65,7 @@ int main()
     }
     for (i=0; i < NUM_POINTS; i++)
     {
-        fprintf(temp5, "%lf %lf\n", xvals[i], medf(yvals[i], 3), 8); //Write the data to a temporary file
+        fprintf(temp5, "%lf %lf\n", xvals[i], medf(yvals[i], 8)); //Write the data to a temporary file
     }
 
     for (i=0; i <  sizeof(commandsForGnuplot)/sizeof(commandsForGnuplot[0]); i++)
